@@ -15,7 +15,7 @@ llm-security-weekly\
 └── README.md
 ```
 
-周报输出到 `D:\朝闻天下\weekly-reports\`，运行日志追加到 `weekly-reports\run.log`。
+周报输出到 `<你的路径>\weekly-reports\`，运行日志追加到 `weekly-reports\run.log`。
 
 ## 首次配置（一次性）
 
@@ -30,19 +30,19 @@ llm-security-weekly\
 2. **手动跑一次验证**（建议按顺序逐步验证，确认无误后再注册定时任务）：
    - ① 最快验证授权码是否可用：用示例周报发一封测试邮件
      ```powershell
-     powershell -NoProfile -ExecutionPolicy Bypass -File D:\朝闻天下\llm-security-weekly\send_email.ps1 -ReportFile "D:\朝闻天下\weekly-reports\weekly-llm-security-2026-08-26.md"
+     powershell -NoProfile -ExecutionPolicy Bypass -File <你的路径>\llm-security-weekly\send_email.ps1 -ReportFile "<你的路径>\weekly-reports\weekly-llm-security-2026-08-26.md"
      ```
    - ② 验证采集（生成 `raw-<时间戳>.json`，输出各板块数量）：
      ```powershell
-     powershell -NoProfile -ExecutionPolicy Bypass -File D:\朝闻天下\llm-security-weekly\collect.ps1
+     powershell -NoProfile -ExecutionPolicy Bypass -File <你的路径>\llm-security-weekly\collect.ps1
      ```
    - ③ 验证摘要（调用 DeepSeek 生成新周报 Markdown）：
      ```powershell
-     powershell -NoProfile -ExecutionPolicy Bypass -File D:\朝闻天下\llm-security-weekly\summarize.ps1
+     powershell -NoProfile -ExecutionPolicy Bypass -File <你的路径>\llm-security-weekly\summarize.ps1
      ```
    - ④ 一键全流程（采集 → 摘要 → 发邮件，日志在 `weekly-reports\run.log`）：
      ```powershell
-     powershell -NoProfile -ExecutionPolicy Bypass -File D:\朝闻天下\llm-security-weekly\run_weekly.ps1
+     powershell -NoProfile -ExecutionPolicy Bypass -File <你的路径>\llm-security-weekly\run_weekly.ps1
      ```
 
 ## 注册 Windows 定时任务（每周一 08:00）
@@ -52,13 +52,13 @@ llm-security-weekly\
 ### 方式 A：在 **cmd.exe（管理员）** 中执行
 
 ```bat
-schtasks /Create /F /TN "LLM-Security-Weekly" /TR "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"D:\朝闻天下\llm-security-weekly\run_weekly.ps1\"" /SC WEEKLY /D MON /ST 08:00
+schtasks /Create /F /TN "LLM-Security-Weekly" /TR "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"<你的路径>\llm-security-weekly\run_weekly.ps1\"" /SC WEEKLY /D MON /ST 08:00
 ```
 
 ### 方式 B：在 **PowerShell（管理员）** 中执行
 
 ```powershell
-$action  = New-ScheduledTaskAction -Execute "powershell.exe" -Argument '-NoProfile -ExecutionPolicy Bypass -File "D:\朝闻天下\llm-security-weekly\run_weekly.ps1"'
+$action  = New-ScheduledTaskAction -Execute "powershell.exe" -Argument '-NoProfile -ExecutionPolicy Bypass -File "<你的路径>\llm-security-weekly\run_weekly.ps1"'
 $trigger = New-ScheduledTaskTrigger -Weekly -DaysOfWeek Monday -At 8am
 Register-ScheduledTask -TaskName "LLM-Security-Weekly" -Action $action -Trigger $trigger -Force
 ```
