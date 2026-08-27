@@ -129,8 +129,19 @@
   <script>
   (function () {
     'use strict';
-    var CFG_PATH = 'llm-security-weekly/config.json';
-    var RUNLOG_PATH = 'weekly-reports/run.log';
+    // 从工作台 site URL 推断项目绝对路径（如 D:\朝闻天下），避免在代码中硬编码本地路径
+    function getProjectRoot() {
+      var p = window.location.pathname || '';
+      var idx = p.indexOf('/api/worktable/site/');
+      if (idx < 0) return '';   // 非工作台环境（file:// 等）→ 空，设置/运行记录退化为不可用
+      var rest = p.slice(idx + '/api/worktable/site/'.length);
+      var slash = rest.lastIndexOf('/');
+      var dirEnc = slash >= 0 ? rest.slice(0, slash) : rest;
+      try { return decodeURIComponent(dirEnc).replace(/\//g, '\\'); } catch (e) { return ''; }
+    }
+    var __root = getProjectRoot();
+    var CFG_PATH = __root ? __root + '\\llm-security-weekly\\config.json' : 'llm-security-weekly/config.json';
+    var RUNLOG_PATH = __root ? __root + '\\weekly-reports\\run.log' : 'weekly-reports/run.log';
 
     // ---------- utilities ----------
     function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
