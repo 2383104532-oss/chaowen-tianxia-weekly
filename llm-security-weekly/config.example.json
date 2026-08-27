@@ -1,0 +1,61 @@
+{
+  "outputDir": "D:\\path\\to\\weekly-reports",
+  "smtp": {
+    "server": "smtp.qq.com",
+    "port": 587,
+    "useSsl": true,
+    "user": "YOUR_QQ_EMAIL@qq.com",
+    "authCode": "YOUR_QQ_SMTP_AUTH_CODE",
+    "from": "YOUR_QQ_EMAIL@qq.com",
+    "to": ["recipient@example.com"]
+  },
+  "llm": {
+    "provider": "deepseek",
+    "apiKey": "sk-YOUR_DEEPSEEK_API_KEY",
+    "model": "deepseek-chat",
+    "baseUrl": "https://api.deepseek.com/chat/completions"
+  },
+  "content": {
+    "githubNewCount": 3,
+    "githubFastCount": 2,
+    "arxivCount": 8,
+    "paperWindowDays": 180,
+    "newsEnCount": 8,
+    "newsZhCount": 0,
+    "githubFilter": "llm|large language|ai agent|agent|gpt|machine learning|deep learning|nlp|rag|inference|model|mcp|openai|anthropic",
+    "githubQueries": [
+      "created:><SINCE> stars:>10",
+      "pushed:><SINCE> stars:>1000"
+    ],
+    "paperStrongKw": "jailbreak|prompt injection|prompt-injection|LLM security|AI safety|red team|guardrail|alignment|model poisoning|machine unlearning|LLM jailbreak|llm hallucinat",
+    "paperLlmKw": "LLM|large language|language model|GPT|ChatGPT|Claude|Gemini|foundation model|transformer|chatbot|chat bot|agent",
+    "paperSecKw": "security|safety|attack|defen|injection|alignment|privacy|poison|vulnerab|adversarial|robust|red team|guardrail|bias|hallucinat|abuse|misuse",
+    "paperSearches": [
+      "large language model security",
+      "prompt injection",
+      "jailbreak",
+      "LLM safety"
+    ],
+    "arxivQuery": [
+      "cat:cs.CR AND (all:\"large language model\" OR all:\"LLM\" OR all:\"language model\")",
+      "cat:cs.LG AND all:\"LLM security\"",
+      "cat:cs.CR AND all:\"prompt injection\""
+    ],
+    "hnQueries": [
+      "LLM security",
+      "prompt injection",
+      "jailbreak",
+      "AI safety"
+    ],
+    "newsKeywordEn": "llm|large language model|ai model|prompt injection|jailbreak|chatgpt|claude|openai|anthropic|agent|red team|guardrail|deepfake|ai safety|hallucinat|artificial intelligence| ai ",
+    "newsKeywordZh": "大模型|人工智能|越狱|提示注入|安全|漏洞|攻击|模型|Agent|AI|智谱|深度求索|字节|阿里|百度|腾讯",
+    "feedsEn": [
+      "https://www.securityweek.com/feed/",
+      "https://www.bleepingcomputer.com/feed/"
+    ],
+    "feedsZh": [
+      "https://www.freebuf.com/feed",
+      "https://www.4hou.com/feed"
+    ]
+  }
+}

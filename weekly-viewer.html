@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>大模型安全与开源周报 · 控制台</title>
+  <link rel="stylesheet" href="/api/worktable/template/dshell.css" />
+  <style>
+    /* 温和浅色主题 */
+    :root {
+      color-scheme: light;
+      --dsw-alias-bg-base: #f6f4ef;
+      --dsw-alias-label-primary: #3d3a35;
+      --dsw-alias-label-secondary: #7d7a72;
+      --dsw-alias-label-tertiary: #a8a49b;
+      --dsw-alias-border-l1: #e6e1d7;
+      --dsw-alias-border-l2: #dbd5c9;
+      --dsw-alias-fill-l1: #ffffff;
+    }
+    html, body { background: #f6f4ef; }
+    body { color: #3d3a35; }
+    .wv-wrap { display: flex; flex-direction: column; height: 100vh; }
+    .wv-body { display: flex; flex: 1; min-height: 0; gap: 12px; }
+    .wv-side { width: 270px; flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; min-height: 0; }
+    .wv-list { flex: 1; overflow: auto; min-height: 0; }
+    .wv-list .dshell-listItem { cursor: pointer; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 8px 10px; border-radius: 8px; border: 1px solid transparent; }
+    .wv-list .dshell-listItem:hover { background: #f0ede6; }
+    .wv-list .dshell-listItem.on { border-color: rgba(74,157,95,.5); background: #edf5ee; }
+    .wv-list .dshell-listItemDate { font-size: 11px; color: var(--dsw-alias-label-tertiary, #a8a49b); }
+    .wv-main { flex: 1; min-width: 0; overflow: auto; padding-right: 4px; }
+    .wv-main .dshell-card { max-width: 980px; margin: 0 auto; background: #fffdfa; border-color: #e6e1d7; }
+    .wv-md h1 { font-size: 20px; margin: 4px 0 10px; }
+    .wv-md h2 { font-size: 16px; margin: 18px 0 8px; padding-bottom: 6px; border-bottom: 1px solid #e6e1d7; }
+    .wv-md h3 { font-size: 14px; margin: 14px 0 6px; }
+    .wv-md h4 { font-size: 13px; margin: 10px 0 4px; }
+    .wv-md ul { margin: 4px 0 8px; padding-left: 20px; }
+    .wv-md li { margin: 2px 0; }
+    .wv-md blockquote { margin: 6px 0; padding: 6px 12px; border-left: 3px solid #dbd5c9; background: #faf8f3; border-radius: 0 8px 8px 0; color: #6f6b64; }
+    .wv-md a { color: #2f7d45; text-decoration: none; }
+    .wv-md a:hover { text-decoration: underline; color: #256b38; }
+    .wv-md code { background: #f0ede6; color: #b25a3c; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+    .wv-md hr { border: none; border-top: 1px solid #e6e1d7; margin: 14px 0; }
+    .wv-md p { margin: 6px 0; }
+    .wv-empty { text-align: center; color: var(--dsw-alias-label-tertiary, #a8a49b); padding: 40px 0; }
+    .wv-search { width: 100%; background: #ffffff; border: 1px solid #e6e1d7; border-radius: 8px; color: inherit; padding: 7px 10px; font: inherit; font-size: 12.5px; outline: none; }
+    .wv-search:focus { border-color: rgba(74,157,95,.5); }
+    .dshell-btn { background: #4a9d5f; color: #fff; }
+    .dshell-badgeDone { color: #2f7d45; border-color: rgba(47,125,69,.35); }
+    .dshell-badgeDone::before { background: #4a9d5f; box-shadow: 0 0 5px #4a9d5f; }
+    .dshell-badgeWait { color: #b8860b; border-color: rgba(184,134,11,.35); }
+    .dshell-badgeWait::before { background: #d9a621; box-shadow: 0 0 5px #d9a621; }
+    /* 设置表单 */
+    .wv-form { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .wv-field label { display: block; font-size: 12px; color: var(--dsw-alias-label-secondary, #7d7a72); margin-bottom: 4px; }
+    .wv-field input { width: 100%; padding: 7px 10px; border: 1px solid #e6e1d7; border-radius: 8px; background: #fff; color: inherit; font: inherit; font-size: 13px; outline: none; }
+    .wv-field input:focus { border-color: rgba(74,157,95,.5); }
+    .wv-hint { font-size: 11.5px; color: var(--dsw-alias-label-tertiary, #a8a49b); }
+    .wv-log { font-family: Consolas, monospace; font-size: 12px; white-space: pre-wrap; word-break: break-all; background: #f9f8f5; border: 1px solid #e6e1d7; border-radius: 8px; padding: 12px 14px; }
+    .wv-log .ok { color: #2f7d45; }
+    .wv-log .err { color: #b25a3c; }
+    .wv-log .skip { color: #a8a49b; }
+    .wv-muted { color: var(--dsw-alias-label-tertiary, #a8a49b); font-size: 11.5px; }
+    @media (max-width: 760px) { .wv-body { flex-direction: column; } .wv-side { width: 100%; max-height: 220px; } .wv-form { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="dshell wv-wrap">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:8px;flex-wrap:wrap">
+      <div>
+        <h1 class="dshell-title">📰 大模型安全与开源周报 · 控制台</h1>
+        <p class="dshell-sub">浏览每周周报 · 调整采集配置 · 查看运行记录</p>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <span class="dshell-badge dshell-badgeDone" id="wvBadgeCount">0 期</span>
+        <span class="dshell-badge dshell-badgeWait" id="wvBadgeMode">数据：内嵌</span>
+      </div>
+    </div>
+
+    <div class="dshell-tabs">
+      <button class="dshell-tab dshell-tabOn" data-tab="overview">📄 概览</button>
+      <button class="dshell-tab" data-tab="settings">⚙️ 设置</button>
+      <button class="dshell-tab" data-tab="runs">🕗 运行记录</button>
+    </div>
+
+    <!-- 概览 -->
+    <div id="tab-overview" class="wv-body" style="display:flex">
+      <aside class="wv-side">
+        <input id="wvSearch" class="wv-search" type="text" placeholder="🔍 搜索周报标题 / 日期…" />
+        <div id="wvList" class="dshell-list wv-list"></div>
+      </aside>
+      <main class="wv-main">
+        <div id="wvView" class="dshell-card"><div class="wv-empty">加载中…</div></div>
+      </main>
+    </div>
+
+    <!-- 设置 -->
+    <div id="tab-settings" class="dshell" style="display:none">
+      <div class="dshell-card">
+        <h2 class="dshell-sub" style="margin:0 0 12px;font-size:14px">⚙️ 采集配置（写入 config.json，下次运行生效）</h2>
+        <div id="cfgMsg" class="wv-muted" style="margin-bottom:8px">正在读取 config.json…</div>
+        <div class="wv-form" id="cfgForm"></div>
+        <div style="display:flex;gap:8px;margin-top:16px">
+          <button class="dshell-btn" id="cfgSave">💾 保存配置</button>
+          <button class="dshell-btn dshell-btnGhost" id="cfgReload">↻ 重新读取</button>
+          <span class="wv-muted" style="align-self:center" id="cfgStatus"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 运行记录 -->
+    <div id="tab-runs" class="dshell" style="display:none">
+      <div class="dshell-card">
+        <h2 class="dshell-sub" style="margin:0 0 12px;font-size:14px">🕗 运行日志（weekly-reports/run.log）</h2>
+        <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center">
+          <button class="dshell-btn" id="logRefresh">↻ 刷新日志</button>
+          <button class="dshell-btn dshell-btnGhost" id="logLast">只看最近一次</button>
+          <span class="wv-muted" id="logMeta"></span>
+        </div>
+        <div id="logView" class="wv-log">加载中…</div>
+      </div>
+    </div>
+
+    <div class="wv-muted" id="wvFoot">数据来自 weekly-reports/index.json 与 llm-security-weekly/config.json，每周自动更新</div>
+  </div>
+
+  <script type="application/json" id="wvEmbedded">{"reports":[]}</script>
+  <script src="weekly-reports/index.json" onerror="window.__REPORTS_FAILED__ = true"></script>
+
+  <script>
+  (function () {
+    'use strict';
+    var CFG_PATH = 'D:\\朝闻天下\\llm-security-weekly\\config.json';
+    var RUNLOG_PATH = 'D:\\朝闻天下\\weekly-reports\\run.log';
+
+    // ---------- utilities ----------
+    function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    function parseReports(text) {
+      text = (text || '').replace(/^\uFEFF/, '');
+      var m = text.match(/window\.__REPORTS__\s*=\s*([\s\S]*?);?\s*$/);
+      var json = m ? m[1] : text;
+      return JSON.parse(json);
+    }
+    function toArray(x) { if (!x) return []; return Array.isArray(x) ? x : [x]; }
+    function readFile(path) {
+      return fetch('/api/worktable/file?path=' + encodeURIComponent(path), { cache: 'no-store' })
+        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); });
+    }
+    function writeFile(path, content) {
+      return fetch('/api/worktable/write', {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ path: path, content: content })
+      }).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return true; });
+    }
+
+    // ---------- markdown ----------
+    function inline(s) {
+      s = esc(s);
+      s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+      s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+      return s;
+    }
+    function renderMd(md) {
+      var lines = String(md || '').split('\n'), html = '', inList = false;
+      for (var i = 0; i < lines.length; i++) {
+        var t = lines[i].trim();
+        if (!t) { if (inList) { html += '</ul>'; inList = false; } continue; }
+        var m;
+        if ((m = t.match(/^(#{1,6})\s+/))) { if (inList) { html += '</ul>'; inList = false; } var n = m[1].length; html += '<h' + n + '>' + inline(t.replace(/^#{1,6}\s*/, '')) + '</h' + n + '>'; }
+        else if (/^[-*]\s+/.test(t)) { if (!inList) { html += '<ul>'; inList = true; } html += '<li>' + inline(t.replace(/^[-*]\s+/, '')) + '</li>'; }
+        else if (/^\d+\.\s+/.test(t)) { if (inList) { html += '</ul>'; inList = false; } html += '<p>' + inline(t.replace(/^\d+\.\s+/, '')) + '</p>'; }
+        else if (/^>\s?/.test(t)) { if (inList) { html += '</ul>'; inList = false; } html += '<blockquote>' + inline(t.replace(/^>\s?/, '')) + '</blockquote>'; }
+        else if (/^(-{3,}|\*{3,})$/.test(t)) { if (inList) { html += '</ul>'; inList = false; } html += '<hr/>'; }
+        else { if (inList) { html += '</ul>'; inList = false; } html += '<p>' + inline(t) + '</p>'; }
+      }
+      if (inList) html += '</ul>';
+      return html;
+    }
+
+    // ---------- overview ----------
+    var state = { reports: [], current: null, filter: '' };
+    function render(list) {
+      state.reports = list;
+      document.getElementById('wvBadgeCount').textContent = list.length + ' 期';
+      document.getElementById('wvBadgeMode').textContent = '数据：' + (window.__WVMODE__ || '实时');
+      if (!state.current && list.length > 0) state.current = list[0].name;
+      renderList();
+      var cur = list.filter(function (r) { return r.name === state.current; })[0] || list[0];
+      if (cur) showReport(cur);
+    }
+    function renderList() {
+      var q = state.filter.toLowerCase();
+      var list = state.reports.filter(function (r) { return !q || (r.title || '').toLowerCase().indexOf(q) >= 0 || (r.date || '').indexOf(q) >= 0; });
+      var box = document.getElementById('wvList');
+      if (list.length === 0) { box.innerHTML = '<div class="wv-empty">无匹配周报</div>'; return; }
+      box.innerHTML = list.map(function (r) {
+        var on = r.name === state.current ? ' on' : '';
+        return '<div class="dshell-listItem' + on + '" data-name="' + esc(r.name) + '">' +
+          '<span class="dshell-listItemTitle">' + esc(r.title || r.name) + '</span>' +
+          '<span class="dshell-listItemDate">📅 ' + esc(r.date || '') + '</span></div>';
+      }).join('');
+      box.querySelectorAll('.dshell-listItem').forEach(function (el) {
+        el.addEventListener('click', function () {
+          state.current = el.getAttribute('data-name');
+          renderList();
+          var r = state.reports.filter(function (x) { return x.name === state.current; })[0];
+          if (r) showReport(r);
+        });
+      });
+    }
+    function showReport(r) {
+      document.getElementById('wvView').innerHTML =
+        '<h2 class="dshell-sub" style="margin:0 0 10px">📅 ' + esc(r.date || '') + '</h2>' +
+        '<div class="wv-md">' + renderMd(r.content) + '</div>';
+    }
+    function loadOverview() {
+      var reports = toArray(window.__REPORTS__);
+      if (reports.length) { window.__WVMODE__ = '实时'; return void render(reports); }
+      fetch('weekly-reports/index.json?t=' + Date.now())
+        .then(function (r) { return r.ok ? r.text() : Promise.reject(new Error('HTTP ' + r.status)); })
+        .then(function (t) { var d = parseReports(t); if (toArray(d).length) { window.__WVMODE__ = '实时'; render(toArray(d)); } else render(loadEmbedded()); })
+        .catch(function () { var e = loadEmbedded(); if (e.length) { window.__WVMODE__ = '内嵌'; render(e); } else document.getElementById('wvView').innerHTML = '<div class="wv-empty">未找到周报数据</div>'; });
+    }
+    function loadEmbedded() {
+      try { return toArray(JSON.parse(document.getElementById('wvEmbedded').textContent).reports); } catch (e) { return []; }
+    }
+    document.getElementById('wvSearch').addEventListener('input', function (e) { state.filter = e.target.value.trim(); renderList(); });
+
+    // ---------- settings ----------
+    var CFG_FIELDS = [
+      { key: 'githubNewCount', label: 'GitHub 本周新项目数', min: 0 },
+      { key: 'githubFastCount', label: 'GitHub 涨星最快项目数', min: 0 },
+      { key: 'arxivCount', label: '论文篇数', min: 1 },
+      { key: 'newsEnCount', label: '英文新闻条数', min: 0 },
+      { key: 'newsZhCount', label: '中文新闻条数', min: 0 },
+      { key: 'paperWindowDays', label: '论文时间窗口(天)', min: 1 }
+    ];
+    var cfgData = null;
+    function loadCfg() {
+      document.getElementById('cfgMsg').textContent = '正在读取 config.json…';
+      document.getElementById('cfgStatus').textContent = '';
+      readFile(CFG_PATH).then(function (t) {
+        cfgData = JSON.parse(t);
+        var form = document.getElementById('cfgForm');
+        form.innerHTML = '';
+        CFG_FIELDS.forEach(function (f) {
+          var v = (cfgData.content && cfgData.content[f.key] != null) ? cfgData.content[f.key] : '';
+          var el = document.createElement('div');
+          el.className = 'wv-field';
+          el.innerHTML = '<label>' + esc(f.label) + '</label><input type="number" min="' + (f.min || 0) + '" data-key="' + esc(f.key) + '" value="' + esc(v) + '"/>';
+          form.appendChild(el);
+        });
+        document.getElementById('cfgMsg').textContent = '✅ 已读取 config.json';
+      }).catch(function (e) {
+        document.getElementById('cfgMsg').innerHTML = '<span class="err">读取失败：' + esc(e.message || e) + '</span><br/>若页面在 file:// 下打开，请通过工作台浏览（设置功能需工作台 API）。';
+      });
+    }
+    document.getElementById('cfgSave').addEventListener('click', function () {
+      if (!cfgData) { document.getElementById('cfgStatus').textContent = '请先读取配置'; return; }
+      var inputs = document.querySelectorAll('#cfgForm input');
+      var invalid = false;
+      inputs.forEach(function (inp) {
+        var v = parseInt(inp.value, 10);
+        if (isNaN(v)) { invalid = true; return; }
+        cfgData.content[inp.getAttribute('data-key')] = v;
+      });
+      if (invalid) { document.getElementById('cfgStatus').textContent = '⚠️ 有非数字输入，已忽略该项'; }
+      var text = JSON.stringify(cfgData, null, 2);
+      document.getElementById('cfgStatus').textContent = '保存中…';
+      writeFile(CFG_PATH, text).then(function () {
+        document.getElementById('cfgStatus').textContent = '✅ 已保存到 config.json，下次运行生效';
+      }).catch(function (e) {
+        document.getElementById('cfgStatus').textContent = '❌ 保存失败：' + (e.message || e);
+      });
+    });
+    document.getElementById('cfgReload').addEventListener('click', loadCfg);
+
+    // ---------- runs ----------
+    var logAll = '';
+    function colorizeLine(line) {
+      var html = esc(line);
+      if (/OK|成功|sent|collected|Report saved|运行 end|保存/i.test(line)) html = '<span class="ok">' + html + '</span>';
+      else if (/ERROR|失败|FAILED|错误/i.test(line)) html = '<span class="err">' + html + '</span>';
+      else if (/skip|跳过|WARN/i.test(line)) html = '<span class="skip">' + html + '</span>';
+      return html;
+    }
+    function renderLog(lines) {
+      var box = document.getElementById('logView');
+      box.innerHTML = lines.map(colorizeLine).join('\n');
+      document.getElementById('logMeta').textContent = (lines.length ? lines.length + ' 行' : '') + ' ｜ 最近运行：' + (window.__LOGSTAMP__ || '');
+    }
+    function loadLog(lastOnly) {
+      document.getElementById('logView').textContent = '加载中…';
+      readFile(RUNLOG_PATH).then(function (t) {
+        logAll = t.replace(/^\uFEFF/, '').trim();
+        var lines = logAll.length ? logAll.split('\n') : [];
+        window.__LOGSTAMP__ = lines.length ? (lines[lines.length - 1].split(/\s{2,}|\t/)[0] || '') : '';
+        if (lastOnly) {
+          // keep from the last "weekly run start" marker
+          var idx = -1;
+          for (var i = lines.length - 1; i >= 0; i--) { if (/weekly run start/.test(lines[i])) { idx = i; break; } }
+          lines = idx >= 0 ? lines.slice(idx) : lines;
+        }
+        renderLog(lines);
+      }).catch(function (e) { document.getElementById('logView').textContent = '读取日志失败：' + (e.message || e); });
+    }
+    document.getElementById('logRefresh').addEventListener('click', function () { loadLog(false); });
+    document.getElementById('logLast').addEventListener('click', function () { loadLog(true); });
+
+    // ---------- tabs ----------
+    document.querySelectorAll('.dshell-tab').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('.dshell-tab').forEach(function (b) { b.classList.remove('dshell-tabOn'); });
+        btn.classList.add('dshell-tabOn');
+        ['overview', 'settings', 'runs'].forEach(function (t) {
+          document.getElementById('tab-' + t).style.display = (t === btn.getAttribute('data-tab')) ? 'flex' : 'none';
+        });
+      });
+    });
+
+    // init
+    loadOverview();
+    loadCfg();
+    loadLog(false);
+  })();
+  </script>
+</body>
+</html>
