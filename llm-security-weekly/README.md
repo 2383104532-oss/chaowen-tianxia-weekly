@@ -1,82 +1,78 @@
-# 大模型安全与开源周报 · 自动化工作流
+# LLM Security Weekly · Automation Workflow
 
-每周自动采集 **GitHub AI/大模型热门项目 + arXiv 大模型安全论文 + 中英文安全新闻**，
-由 LLM 生成中文周报（Markdown），并通过 QQ 邮箱 SMTP 发送。
+Automatically collect **GitHub AI/LLM trending projects + LLM-security papers + English security news** every week, have an LLM generate a Chinese weekly report (Markdown), and send it via QQ Mail SMTP.
 
-## 目录结构
+## Structure
 
 ```
 llm-security-weekly\
-├── config.json        # 所有配置：邮箱、LLM API、内容数量、关键词、RSS 源
-├── collect.ps1        # 采集：GitHub API + arXiv API + RSS → raw-<时间戳>.json
-├── summarize.ps1      # 摘要：调用 LLM API 生成中文周报 Markdown
-├── send_email.ps1     # 发送：QQ SMTP 发送周报邮件（正文为 HTML）
-├── run_weekly.ps1     # 总入口：采集 → 摘要 → 发邮件（含日志）
+├── config.json        # all config: email, LLM API, counts, keywords, RSS feeds
+├── collect.ps1        # collect: GitHub API + Crossref + HN/RSS -> raw-<timestamp>.json
+├── summarize.ps1      # summarize: call LLM API to generate the Chinese report Markdown
+├── send_email.ps1     # send: QQ SMTP (HTML body)
+├── run_weekly.ps1     # entry: collect -> summarize -> email (with log)
 └── README.md
 ```
 
-周报输出到 `<你的路径>\weekly-reports\`，运行日志追加到 `weekly-reports\run.log`。
+Reports go to `<your-path>\weekly-reports\`; the run log appends to `weekly-reports\run.log`.
 
-## 首次配置（一次性）
+## First-time Setup (one-off)
 
-1. **编辑 `config.json`**：
-   - `smtp.user` / `smtp.from`：填你的 QQ 邮箱地址
-   - `smtp.authCode`：QQ 邮箱授权码（非登录密码）。获取：QQ 邮箱 → 设置 → 账户 → 开启 SMTP → 生成授权码
-   - `smtp.to`：收件人邮箱数组，可多个
-   - `llm.apiKey`：DeepSeek API Key（https://platform.deepseek.com/ 申请）
-   - 如换 OpenAI：改 `llm.provider/model/baseUrl`
-   - `content.*`：各板块数量、关键词、RSS 源，可按需调整
+1. **Edit `config.json`**:
+   - `smtp.user` / `smtp.from`: your QQ email address
+   - `smtp.authCode`: QQ Mail app password (not your login password). Get it: QQ Mail → Settings → Account → enable SMTP → generate app password
+   - `smtp.to`: recipient email array (can be multiple)
+   - `llm.apiKey`: DeepSeek API key (https://platform.deepseek.com/ )
+   - To switch to OpenAI: change `llm.provider/model/baseUrl`
+   - `content.*`: section counts, keywords, RSS feeds — adjust as needed
 
-2. **手动跑一次验证**（建议按顺序逐步验证，确认无误后再注册定时任务）：
-   - ① 最快验证授权码是否可用：用示例周报发一封测试邮件
+2. **Run once to verify** (step by step, then register the scheduled task):
+   - ① Fastest: verify the app password by sending a test email with an existing report
      ```powershell
-     powershell -NoProfile -ExecutionPolicy Bypass -File <你的路径>\llm-security-weekly\send_email.ps1 -ReportFile "<你的路径>\weekly-reports\weekly-llm-security-2026-08-26.md"
+     powershell -NoProfile -ExecutionPolicy Bypass -File <your-path>\llm-security-weekly\send_email.ps1 -ReportFile "<your-path>\weekly-reports\weekly-llm-security-2026-08-26.md"
      ```
-   - ② 验证采集（生成 `raw-<时间戳>.json`，输出各板块数量）：
+   - ② Verify collection (produces `raw-<timestamp>.json`, prints section counts):
      ```powershell
-     powershell -NoProfile -ExecutionPolicy Bypass -File <你的路径>\llm-security-weekly\collect.ps1
+     powershell -NoProfile -ExecutionPolicy Bypass -File <your-path>\llm-security-weekly\collect.ps1
      ```
-   - ③ 验证摘要（调用 DeepSeek 生成新周报 Markdown）：
+   - ③ Verify summarization (DeepSeek generates a new report Markdown):
      ```powershell
-     powershell -NoProfile -ExecutionPolicy Bypass -File <你的路径>\llm-security-weekly\summarize.ps1
+     powershell -NoProfile -ExecutionPolicy Bypass -File <your-path>\llm-security-weekly\summarize.ps1
      ```
-   - ④ 一键全流程（采集 → 摘要 → 发邮件，日志在 `weekly-reports\run.log`）：
+   - ④ One-shot full pipeline (collect -> summarize -> email; log in `weekly-reports\run.log`):
      ```powershell
-     powershell -NoProfile -ExecutionPolicy Bypass -File <你的路径>\llm-security-weekly\run_weekly.ps1
+     powershell -NoProfile -ExecutionPolicy Bypass -File <your-path>\llm-security-weekly\run_weekly.ps1
      ```
 
-## 注册 Windows 定时任务（每周一 08:00）
+## Register a Windows Scheduled Task (first boot of each week)
 
-> ⚠️ 需要**管理员权限**（普通 PowerShell 会被拒绝访问）。注册任务后建议在"任务计划程序"里确认"使用最高权限运行"或至少以当前用户运行。
+> ⚠️ Needs **admin rights** (a normal PowerShell will be denied). After registering, confirm in Task Scheduler to run with highest privileges or at least as the current user.
 
-### 方式 A：在 **cmd.exe（管理员）** 中执行
+### Option A: in **cmd.exe (admin)**
 
 ```bat
-schtasks /Create /F /TN "LLM-Security-Weekly" /TR "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"<你的路径>\llm-security-weekly\run_weekly.ps1\"" /SC WEEKLY /D MON /ST 08:00
+schtasks /Create /F /TN "LLM-Security-Weekly" /TR "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"<your-path>\llm-security-weekly\run_weekly.ps1\"" /SC WEEKLY /D MON /ST 08:00
 ```
 
-### 方式 B：在 **PowerShell（管理员）** 中执行
+### Option B: in **PowerShell (admin)**
 
 ```powershell
-$action  = New-ScheduledTaskAction -Execute "powershell.exe" -Argument '-NoProfile -ExecutionPolicy Bypass -File "<你的路径>\llm-security-weekly\run_weekly.ps1"'
-$trigger = New-ScheduledTaskTrigger -Weekly -DaysOfWeek Monday -At 8am
+$action  = New-ScheduledTaskAction -Execute "powershell.exe" -Argument '-NoProfile -ExecutionPolicy Bypass -File "<your-path>\llm-security-weekly\run_weekly.ps1"'
+$trigger = New-ScheduledTaskTrigger -AtStartup
 Register-ScheduledTask -TaskName "LLM-Security-Weekly" -Action $action -Trigger $trigger -Force
 ```
 
-其他命令：
-- 手动运行：`schtasks /Run /TN "LLM-Security-Weekly"`
-- 查看状态：`schtasks /Query /TN "LLM-Security-Weekly" /V /FO LIST`
-- 删除任务：`schtasks /Delete /TN "LLM-Security-Weekly" /F`
+Other commands:
+- Run manually: `schtasks /Run /TN "LLM-Security-Weekly"`
+- Show status: `schtasks /Query /TN "LLM-Security-Weekly" /V /FO LIST`
+- Delete task: `schtasks /Delete /TN "LLM-Security-Weekly" /F`
 
-## 说明与限制
+## Notes & Limits
 
-- **论文来源自动降级**：优先 arXiv API；网络不可达时自动切换 Crossref 学术数据库（`api.crossref.org`，免 key、限额宽松），
-  仍按关键词（LLM security / prompt injection / jailbreak / LLM safety）+ 近 7 天过滤，条目带 DOI 链接。
-- **英文新闻**：主要来自 Hacker News（hn.algolia.com，拆 4 个关键词查询）+ RSS 源。
-- **中文新闻**：FreeBuf / 嘶吼 RSS（已修复 XML 编码与标题提取）。
-- 中文新闻源 RSS 可能不稳定或为空，此时周报会如实标注"本期未采集到"；
-  可在 `content.feedsZh` 中增删 RSS 源。
-- 本机执行环境（AI 会话沙箱）无外网，脚本需在**普通 PowerShell（非沙箱）**下运行才能联网；
-  定时任务由 Windows 计划程序直接运行，不受此限制。
-- LLM 摘要要求 `llm.apiKey` 有效；未配置时 summarize 会跳过，只产出原始数据存档。
-- 邮件正文为简单 Markdown→HTML 转换，表格/复杂格式可能不完美。
+- **Paper source auto-fallback**: prefers arXiv API; falls back to Crossref (`api.crossref.org`, no key, generous limits) when unreachable, filtering by keywords (LLM security / prompt injection / jailbreak / LLM safety) with a recent window; items carry DOI links.
+- **English news**: mainly Hacker News (hn.algolia.com, 4 keyword queries) + RSS feeds.
+- **Chinese news**: FreeBuf / 嘶吼 RSS (XML encoding & title extraction fixed).
+- Chinese RSS feeds may be unstable or empty — the report will then honestly note "no items collected this week"; add/remove feeds in `content.feedsZh`.
+- The AI sandbox has no external network; scripts must run in a **normal PowerShell (not sandbox)** to reach the network; the scheduled task runs directly via Task Scheduler, unaffected.
+- LLM summarization requires a valid `llm.apiKey`; if unconfigured, summarize is skipped and only the raw data archive is produced.
+- The email body is a simple Markdown→HTML conversion; tables / complex formatting may be imperfect.

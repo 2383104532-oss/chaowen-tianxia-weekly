@@ -1,137 +1,138 @@
-# 📰 朝闻天下 · 大模型安全与开源周报
+# 📰 Chaowen Tianxia · LLM Security & Open Source Weekly
 
-每周自动采集 **GitHub 好用开源项目 + 大模型安全论文 + 英文安全新闻**，由 **DeepSeek** 生成中文周报，通过 **QQ 邮箱**自动推送。项目附带一个**工作台周报浏览页**，可浏览历史周报、调整采集配置、查看运行记录。
+Automatically curate, every week, the **top open-source projects, LLM-security papers, and English security news**, then let **DeepSeek** generate a structured **Chinese weekly report** delivered to you via **QQ Email**. The project also ships a **worktable weekly-viewer page** to browse past reports, tweak collection settings, and inspect run logs.
 
-> 中文项目名「朝闻天下」——意为"早晨知晓天下事"，每日自动为你整理 AI 圈值得关注的动态。
-
----
-
-## ✨ 功能特性
-
-- **自动采集**
-  - **GitHub**：本周新建项目 + 近 30 天涨星最快的 AI/大模型项目
-  - **论文**：大模型安全相关（越狱/提示注入/对齐/隐私/红队等），支持半年时间窗口，学科权威来源（Crossref DOI + arXiv）
-  - **新闻**：英文（Hacker News + 安全媒体 RSS）
-- **AI 生成**：DeepSeek 根据采集数据生成结构化中文周报（要点 + 推荐理由）
-- **邮件推送**：QQ 邮箱 SMTP（STARTTLS，587）自动发送
-- **定时调度**：Windows 任务计划程序，**每周第一次开机自动运行**（防重复）
-- **周报浏览页**：工作台窗口内浏览历史周报、切换阅读、调整配置、查看运行日志
+> **"朝闻天下 (Chaowen Tianxia)"** — "Learn what's happening in the world every morning." This project auto-archives the week's AI-security highlights into a concise report, so you catch 20+ curated items in 5 minutes and never miss a key LLM-security development.
 
 ---
 
-## 📁 目录结构
+## ✨ Features
+
+- **Automated collection**
+  - **GitHub**: new projects this week + fastest-growing AI/LLM projects in the last 30 days
+  - **Papers**: LLM-security related (jailbreak / prompt injection / alignment / privacy / red team…), with a 6-month window, from the authoritative Crossref (DOI) / arXiv sources
+  - **News**: English (Hacker News + security-media RSS)
+- **AI generation**: DeepSeek turns the collected data into a structured Chinese weekly report (key points + why it matters)
+- **Email delivery**: QQ Mail SMTP (STARTTLS, 587) — auto-sent
+- **Scheduled runs**: Windows Task Scheduler — **runs at the first boot of each week** (with dedup)
+- **Weekly-viewer page**: browse history, switch reports, adjust config, and view run logs inside the worktable pane
+
+---
+
+## 📁 Structure
 
 ```
-朝闻天下/
-├── README.md                     # 项目说明（本文件）
-├── LICENSE                       # 开源协议
-├── .gitignore                    # 排除密钥/产物/日志
-├── weekly-viewer.html            # 工作台周报控制台浏览页
-├── llm-security-weekly/          # 核心脚本
-│   ├── config.example.json       # 配置模板（复制为 config.json 后填写密钥）
-│   ├── collect.ps1               # 采集：GitHub API + Crossref 论文 + HN/RSS 新闻
-│   ├── summarize.ps1             # 摘要：DeepSeek 生成中文周报
-│   ├── send_email.ps1            # 发送：QQ SMTP 587
-│   ├── run_weekly.ps1            # 总入口：采集→摘要→发信（含周一门控与日志）
-│   └── README.md                 # 脚本使用说明（详细）
-└── weekly-reports/               # 运行产物（已被 .gitignore 忽略）
-    ├── weekly-llm-security-YYYY-MM-DD.md   # 生成的周报
-    ├── index.json                # 周报索引（浏览页数据源）
-    └── run.log                   # 运行日志
+chaowen-tianxia/
+├── README.md                     # Project overview (this file)
+├── README.zh-CN.md               # 中文说明（Chinese version）
+├── LICENSE                       # MIT
+├── .gitignore                    # excludes secrets / artifacts / logs
+├── weekly-viewer.html            # worktable weekly-report console page
+├── llm-security-weekly/          # core scripts
+│   ├── config.example.json       # config template (copy to config.json, fill secrets)
+│   ├── collect.ps1               # collect: GitHub API + Crossref papers + HN/RSS news
+│   ├── summarize.ps1             # summarize: DeepSeek generates the Chinese report
+│   ├── send_email.ps1            # send: QQ SMTP 587 (HTML body)
+│   ├── run_weekly.ps1            # entry: collect -> summarize -> email (weekly gate + log)
+│   └── README.md                 # scripts usage (detailed)
+└── weekly-reports/               # runtime artifacts (git-ignored)
+    ├── weekly-llm-security-YYYY-MM-DD.md   # generated weekly report
+    ├── index.json                # report index (viewer data source)
+    └── run.log                   # run log
 ```
 
 ---
 
-## 🚀 快速开始
+## 🚀 Quick Start
 
-### 1. 克隆 / 下载
+### 1. Clone
 
 ```bash
-git clone <你的仓库地址> 朝闻天下
-cd 朝闻天下
+git clone <your-repo-url> chaowen-tianxia
+cd chaowen-tianxia
 ```
 
-### 2. 配置
+### 2. Configure
 
-复制配置模板并填入你的密钥：
+Copy the template and fill in your secrets:
 
 ```powershell
-# 在 llm-security-weekly/ 目录下
+# inside llm-security-weekly/
 Copy-Item config.example.json config.json
 ```
 
-编辑 `config.json`，至少填写：
-- `smtp.user` / `smtp.from`：QQ 邮箱地址
-- `smtp.authCode`：QQ 邮箱**授权码**（获取：QQ 邮箱 → 设置 → 账户 → 开启 SMTP → 生成授权码）
-- `smtp.to`：收件人邮箱（可多个）
-- `llm.apiKey`：DeepSeek API Key（https://platform.deepseek.com/ ）
-- `outputDir`：周报输出目录（改为你的实际路径）
+Edit `config.json` — at minimum set:
+- `smtp.user` / `smtp.from`: your QQ email address
+- `smtp.authCode`: QQ mail **app password** (QQ Mail → Settings → Account → enable SMTP → generate app password)
+- `smtp.to`: recipient email(s)
+- `llm.apiKey`: DeepSeek API key (https://platform.deepseek.com/ )
+- `outputDir`: your report output directory
 
-> **安全提示**：`config.json` 含密钥，已加入 `.gitignore`，**切勿提交**。
+> **Security**: `config.json` contains secrets and is git-ignored — **never commit it**.
 
-### 3. 手动跑一次
+### 3. Run Once
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File llm-security-weekly\run_weekly.ps1
 ```
 
-会依次：采集 → DeepSeek 生成周报 → 发送邮件。日志在 `weekly-reports/run.log`。
+It will: collect → DeepSeek generates the report → send email. Logs go to `weekly-reports/run.log`.
 
-### 4. 设置定时任务（每周第一次开机）
+### 4. Schedule (first boot of each week)
 
-以**管理员** PowerShell 运行：
+Run in an **admin** PowerShell:
 
 ```powershell
-$action  = New-ScheduledTaskAction -Execute "powershell.exe" -Argument '-NoProfile -ExecutionPolicy Bypass -File "<你的路径>\llm-security-weekly\run_weekly.ps1"'
+$action  = New-ScheduledTaskAction -Execute "powershell.exe" -Argument '-NoProfile -ExecutionPolicy Bypass -File "<your-path>\llm-security-weekly\run_weekly.ps1"'
 $trigger = New-ScheduledTaskTrigger -AtStartup
 Register-ScheduledTask -TaskName "LLM-Security-Weekly" -Action $action -Trigger $trigger -Description "Weekly LLM report - first boot of each week" -Force
 ```
 
-`run_weekly.ps1` 内置**每周门控**：本周一以来若已生成周报则跳过（防重复），保证**每周第一次开机**才真正执行。
+`run_weekly.ps1` has a built-in **weekly gate**: it skips if a report was already generated since this Monday (dedup), so it actually runs **only on the first boot of each week**.
 
 ---
 
-## 🔧 自定义采集（config.json）
+## 🔧 Customization (config.json)
 
-| 字段 | 说明 | 默认 |
+| Field | Description | Default |
 |---|---|---|
-| `githubNewCount` | GitHub 本周新项目数 | 3 |
-| `githubFastCount` | GitHub 涨星最快项目数 | 2 |
-| `arxivCount` | 论文篇数 | 8 |
-| `paperWindowDays` | 论文收录时间窗口（天） | 180 |
-| `newsEnCount` | 英文新闻条数 | 8 |
-| `newsZhCount` | 中文新闻条数 | 0 |
-| `feedsEn` / `feedsZh` | 新闻 RSS 源列表 | — |
+| `githubNewCount` | GitHub new-project count | 3 |
+| `githubFastCount` | GitHub fastest-growing count | 2 |
+| `arxivCount` | paper count | 8 |
+| `paperWindowDays` | paper time window (days) | 180 |
+| `newsEnCount` | English news count | 8 |
+| `newsZhCount` | Chinese news count | 0 |
+| `feedsEn` / `feedsZh` | news RSS feed lists | — |
 
 ---
 
-## 🖥️ 周报浏览页
+## 🖥️ Weekly-Viewer Page
 
-`weekly-viewer.html` 用于在 DeepSeek Harness 工作台的窗口内浏览周报，具备：
+`weekly-viewer.html` is used inside a DeepSeek Harness worktable pane:
 
-- **概览**：左侧历史周报列表（点击切换），右侧 Markdown 渲染阅读
-- **设置**：直接在页面调整采集参数，保存写入 `config.json`
-- **运行记录**：查看 `run.log` 最近运行状态（成功/错误高亮）
+- **Overview**: left = past reports (click to switch); right = rendered Markdown
+- **Settings**: tune collection params in the page; saved back to `config.json`
+- **Run log**: view recent `run.log` status (success/error highlighted)
 
-> 页面的"设置/运行记录"依赖工作台 API；独立双击打开时可浏览周报，但配置读写不可用。
+> The Settings / Run-log tabs rely on worktable APIs; opening the file directly (file://) still lets you browse reports, but config read/write is disabled.
 
 ---
 
-## ❓ 常见问题
+## ❓ FAQ
 
-- **论文来自哪？** 你的网络无法访问 `arxiv.org` 时，自动降级为 **Crossref** 学术数据库（正式出版论文，含 DOI），同样权威可靠。
-- **英文新闻源？** 主源 Hacker News（Algolia API，免费无需 key），辅以安全媒体 RSS。
-- **密钥安全？** 密钥只在 `config.json`，已被 `.gitignore` 排除；脚本从配置读取，无硬编码。
-- **中文新闻？** 默认关闭（`newsZhCount: 0`）；如需，可在 `feedsZh` 增加 RSS 源（如 FreeBuf / 嘶吼）并调大 `newsZhCount`。
+- **Where do papers come from?** If your network can't reach `arxiv.org`, it auto-falls back to **Crossref** (published papers with DOI), equally authoritative.
+- **English news source?** Mainly Hacker News (Algolia API, free, no key), plus security-media RSS.
+- **Secrets safe?** Secrets live only in `config.json` (git-ignored); scripts read from config, no hardcoding.
+- **Chinese news?** Disabled by default (`newsZhCount: 0`); to enable, add RSS feeds to `feedsZh` and raise `newsZhCount`.
 
 ---
 
 ## 📄 License
 
-MIT License（见 `LICENSE`）
+MIT License (see `LICENSE`)
 
 ---
 
-## 🙌 说明
+## 🙌 Notes
 
-本项目为个人自动化工作流，数据来源于公开 API / RSS，仅供学习和个人使用。论文内容以原文为准；请遵守相关数据源条款。
+This is a personal automation workflow. Data comes from public APIs / RSS and is for study & personal use only. Paper content follows the original; please respect the respective data-source terms.
