@@ -4,6 +4,9 @@ Automatically curate, every week, the **top open-source projects, LLM-security p
 
 > **"朝闻天下 (Chaowen Tianxia)"** — "Learn what's happening in the world every morning." This project auto-archives the week's AI-security highlights into a concise report, so you catch 20+ curated items in 5 minutes and never miss a key LLM-security development.
 
+> ## ⚠️ Runs on dsh-worktable
+> Full functionality (the weekly-viewer page's **Settings** and **Run log** tabs, config read/write, run-log viewing) requires the open-source **[dsh-worktable](https://github.com/Aisland-SJL/dsh-worktable)** — a **workbench plugin for DeepSeek Harness** (sidebar app drawer + dockable split workspace + per-project control room). Load `weekly-viewer.html` as a worktable pane; opening it directly (`file://`) only lets you browse reports.
+
 ---
 
 ## ✨ Features
