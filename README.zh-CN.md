@@ -116,7 +116,7 @@ Register-ScheduledTask -TaskName "LLM-Security-Weekly" -Action $action -Trigger 
 - **设置**：直接在页面调整采集参数，保存写入 `config.json`
 - **运行记录**：查看 `run.log` 最近运行状态（成功/错误高亮）
 
-> 页面的"设置/运行记录"依赖工作台 API；独立双击打开时可浏览周报，但配置读写不可用。
+> **完整功能依赖 [dsh-worktable](https://github.com/Aisland-SJL/dsh-worktable)**——DeepSeek Harness 的开源**工作台插件**（侧边栏应用抽屉 + 可停靠分屏工作区 + 每个项目的实时控制室）。本页面需作为工作台窗口加载，其「**设置**」「**运行记录**」通过工作台 API 工作。若用 `file://` 独立打开，仅能**浏览周报**，配置读写与运行日志查看不可用。
 
 ---
 

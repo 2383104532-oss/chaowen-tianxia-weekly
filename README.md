@@ -114,7 +114,7 @@ Register-ScheduledTask -TaskName "LLM-Security-Weekly" -Action $action -Trigger 
 - **Settings**: tune collection params in the page; saved back to `config.json`
 - **Run log**: view recent `run.log` status (success/error highlighted)
 
-> The Settings / Run-log tabs rely on worktable APIs; opening the file directly (file://) still lets you browse reports, but config read/write is disabled.
+> **Full functionality requires [dsh-worktable](https://github.com/Aisland-SJL/dsh-worktable)**, the open-source **workbench plugin for DeepSeek Harness** (sidebar app drawer + dockable split workspace + per-project control room). The page is meant to be loaded as a worktable pane, where its **Settings** and **Run-log** tabs work through the worktable APIs. Opening the file directly (`file://`) still lets you **browse reports**, but config read/write and run-log viewing are disabled.
 
 ---
 
