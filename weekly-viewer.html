@@ -225,12 +225,22 @@
         '<div class="wv-md">' + renderMd(r.content) + '</div>';
     }
     function loadOverview() {
+      // 以带时间戳的 fetch 为主，绕开浏览器缓存，确保读到最新 index.json
+      fetch('weekly-reports/index.json?t=' + Date.now(), { cache: 'no-store' })
+        .then(function (r) { return r.ok ? r.text() : Promise.reject(new Error('HTTP ' + r.status)); })
+        .then(function (t) {
+          var d = parseReports(t);
+          if (toArray(d).length) { window.__WVMODE__ = '实时'; return void render(toArray(d)); }
+          fallbackOverview();
+        })
+        .catch(function () { fallbackOverview(); });
+    }
+    function fallbackOverview() {
       var reports = toArray(window.__REPORTS__);
       if (reports.length) { window.__WVMODE__ = '实时'; return void render(reports); }
-      fetch('weekly-reports/index.json?t=' + Date.now())
-        .then(function (r) { return r.ok ? r.text() : Promise.reject(new Error('HTTP ' + r.status)); })
-        .then(function (t) { var d = parseReports(t); if (toArray(d).length) { window.__WVMODE__ = '实时'; render(toArray(d)); } else render(loadEmbedded()); })
-        .catch(function () { var e = loadEmbedded(); if (e.length) { window.__WVMODE__ = '内嵌'; render(e); } else document.getElementById('wvView').innerHTML = '<div class="wv-empty">未找到周报数据</div>'; });
+      var e = loadEmbedded();
+      if (e.length) { window.__WVMODE__ = '内嵌'; render(e); }
+      else document.getElementById('wvView').innerHTML = '<div class="wv-empty">未找到周报数据</div>';
     }
     function loadEmbedded() {
       try { return toArray(JSON.parse(document.getElementById('wvEmbedded').textContent).reports); } catch (e) { return []; }
